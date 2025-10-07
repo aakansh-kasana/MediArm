@@ -1,7 +1,7 @@
 'use server';
 
 import { summarizeMedicalReport } from '@/ai/flows/summarize-medical-report';
-import { MOCK_ARM_MODEL_URI } from '@/lib/mock-model';
+import { generate3DModelFromImages } from '@/ai/flows/generate-3d-model-from-images';
 import { z } from 'zod';
 
 const reconstructionInputSchema = z.object({
@@ -10,26 +10,12 @@ const reconstructionInputSchema = z.object({
   radiologistNotes: z.string(),
 });
 
-// This is a mock function. The file `src/ai/flows/generate-3d-model-from-images.ts`
-// is incomplete in the user's project. In a real scenario, you would import and use
-// the actual function from that file.
-async function generate3DModelFromImages(input: { images: string[] }): Promise<{ modelDataUri: string }> {
-  console.log('Mock generating 3D model from', input.images.length, 'images.');
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 3000));
-  
-  // Return a mock model URI.
-  // Using the placeholder URI as the full one is too large for this context.
-  return { modelDataUri: MOCK_ARM_MODEL_URI };
-}
-
 
 export async function createReconstruction(input: z.infer<typeof reconstructionInputSchema>) {
   try {
     const validatedInput = reconstructionInputSchema.parse(input);
 
     // Step 1: Generate the 3D model from images.
-    // Replace this with the actual AI flow when available.
     const modelResult = await generate3DModelFromImages({ images: validatedInput.images });
 
     if (!modelResult.modelDataUri) {
