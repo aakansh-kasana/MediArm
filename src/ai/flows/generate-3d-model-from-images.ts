@@ -1,16 +1,10 @@
 'use server';
 
-/**
- * @fileOverview Generates a 3D model of an arm from uploaded images.
- *
- * - generate3DModelFromImages - A function that handles the generation of a 3D model from images.
- * - Generate3DModelFromImagesInput - The input type for the generate3DModelFromImages function.
- * - Generate3DModelFromImagesOutput - The return type for the generate3DModelFromImages function.
- */
-
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import { MOCK_ARM_MODEL_URI } from '@/lib/mock-model';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { exec } from 'child-process-promise';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const Generate3DModelFromImagesInputSchema = z.object({
   images: z
@@ -44,11 +38,22 @@ const generate3DModelFromImagesFlow = ai.defineFlow(
     outputSchema: Generate3DModelFromImagesOutputSchema,
   },
   async (input) => {
-    console.log('Mock generating 3D model from', input.images.length, 'images.');
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Return a mock model URI.
-    return { modelDataUri: MOCK_ARM_MODEL_URI };
+    const image = input.images[0]; // For now, we only use the first image
+    const data = image.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(data, 'base64');
+    const inputPath = path.join('/tmp', 'input.png');
+    const outputPath = path.join('/tmp', 'output.obj');
+
+    fs.writeFileSync(inputPath, buffer);
+
+    try {
+      await exec(`./pifuhd/run_pifuhd.py ${inputPath} ${outputPath}`);
+      const modelData = fs.readFileSync(outputPath, 'base64');
+      const modelDataUri = `data:application/octet-stream;base64,${modelData}`;
+      return { modelDataUri };
+    } catch (error) {
+      console.error('Error generating 3D model:', error);
+      throw error;
+    }
   }
 );
