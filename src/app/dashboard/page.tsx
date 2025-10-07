@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlusCircle } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
 
 // Mock data, replace with Firestore call
 const mockReconstructions = [
@@ -37,13 +36,11 @@ const mockReconstructions = [
 ];
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-
   return (
     <div className="container py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {user?.displayName || 'Doctor'}!</h1>
+          <h1 className="text-3xl font-bold">Reconstruction Dashboard</h1>
           <p className="text-muted-foreground">Here are your recent arm reconstructions.</p>
         </div>
         <Button asChild>
